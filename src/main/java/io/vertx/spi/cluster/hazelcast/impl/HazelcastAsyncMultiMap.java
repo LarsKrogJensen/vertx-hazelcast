@@ -18,7 +18,7 @@ package io.vertx.spi.cluster.hazelcast.impl;
 
 import com.hazelcast.core.EntryEvent;
 import com.hazelcast.core.EntryListener;
-import com.hazelcast.core.MapEvent;
+import com.hazelcast.map.MapEvent;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -43,7 +43,7 @@ import java.util.function.Predicate;
 public class HazelcastAsyncMultiMap<K, V> implements AsyncMultiMap<K, V>, EntryListener<K, V> {
 
   private final VertxInternal vertx;
-  private final com.hazelcast.core.MultiMap<K, V> map;
+  private final com.hazelcast.multimap.MultiMap<K, V> map;
   private final TaskQueue taskQueue = new TaskQueue();
 
 
@@ -59,7 +59,7 @@ public class HazelcastAsyncMultiMap<K, V> implements AsyncMultiMap<K, V>, EntryL
     */
   private ConcurrentMap<K, ChoosableSet<V>> cache = new ConcurrentHashMap<>();
 
-  public HazelcastAsyncMultiMap(Vertx vertx, com.hazelcast.core.MultiMap<K, V> map) {
+  public HazelcastAsyncMultiMap(Vertx vertx, com.hazelcast.multimap.MultiMap<K, V> map) {
     this.vertx = (VertxInternal) vertx;
     this.map = map;
     map.addEntryListener(this, true);
@@ -232,6 +232,11 @@ public class HazelcastAsyncMultiMap<K, V> implements AsyncMultiMap<K, V>, EntryL
 
   public void clearCache() {
     cache.clear();
+  }
+
+  @Override
+  public void entryExpired(EntryEvent<K, V> event) {
+    entryRemoved(event);
   }
 
   private static class GetRequest<K, V> {

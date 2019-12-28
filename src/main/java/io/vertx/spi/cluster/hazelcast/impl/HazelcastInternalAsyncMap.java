@@ -16,26 +16,20 @@
 
 package io.vertx.spi.cluster.hazelcast.impl;
 
-import com.hazelcast.core.ICompletableFuture;
-import com.hazelcast.core.IMap;
-import io.vertx.core.AsyncResult;
+import com.hazelcast.map.IMap;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
-import io.vertx.core.impl.PromiseInternal;
 import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.shareddata.AsyncMap;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 
-import static io.vertx.spi.cluster.hazelcast.impl.ConversionUtils.*;
+import static io.vertx.spi.cluster.hazelcast.impl.ConversionUtils.convertParam;
+import static io.vertx.spi.cluster.hazelcast.impl.ConversionUtils.convertReturn;
 
 public class HazelcastInternalAsyncMap<K, V> implements AsyncMap<K, V> {
 
@@ -70,7 +64,7 @@ public class HazelcastInternalAsyncMap<K, V> implements AsyncMap<K, V> {
   public Future<Void> put(K k, V v, long ttl) {
     K kk = convertParam(k);
     V vv = convertParam(v);
-    return executeAsync((ICompletableFuture<Void>) map.putAsync(kk, vv, ttl, TimeUnit.MILLISECONDS));
+    return executeAsync((CompletableFuture<Void>) map.putAsync(kk, vv, ttl, TimeUnit.MILLISECONDS));
   }
 
   @Override
@@ -159,9 +153,9 @@ public class HazelcastInternalAsyncMap<K, V> implements AsyncMap<K, V> {
     });
   }
 
-  private <T> Future<T> executeAsync(ICompletableFuture<T> future) {
+  private <T> Future<T> executeAsync(CompletionStage<T> future) {
     Promise<T> promise = ((VertxInternal) vertx).getOrCreateContext().promise();
-    future.andThen(new HandlerCallBackAdapter<T>(promise));
+    future.whenComplete(new HandlerCallBackAdapter<T>(promise));
     return promise.future();
   }
 }

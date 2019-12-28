@@ -24,10 +24,11 @@
     <property name="hazelcast.local.localAddress">127.0.0.1</property>
   </properties>
 
-  <group>
-    <name>${vertx.hazelcast.test.group.name}</name>
-    <password>${vertx.hazelcast.test.group.password}</password>
-  </group>
+<!--  <group>-->
+<!--    <name>${vertx.hazelcast.test.group.name}</name>-->
+<!--    <password>${vertx.hazelcast.test.group.password}</password>-->
+<!--  </group>-->
+  <cluster-name>${vertx.hazelcast.test.group.name}</cluster-name>
   <management-center enabled="false">http://localhost:8080/mancenter</management-center>
   <network>
     <port auto-increment="true" port-count="10000">5701</port>
@@ -130,21 +131,22 @@
         LFU (Least Frequently Used).
         NONE is the default.
     -->
-    <eviction-policy>NONE</eviction-policy>
+    <eviction eviction-policy="NONE" max-size-policy="PER_NODE" size="0"/>
+<!--    <eviction-policy>NONE</eviction-policy>-->
     <!--
         Maximum size of the map. When max size is reached,
         map is evicted based on the policy defined.
         Any integer between 0 and Integer.MAX_VALUE. 0 means
         Integer.MAX_VALUE. Default is 0.
     -->
-    <max-size policy="PER_NODE">0</max-size>
+<!--    <max-size policy="PER_NODE">0</max-size>-->
     <!--
         When max. size is reached, specified percentage of
         the map will be evicted. Any integer between 0 and 100.
         If 25 is set for example, 25% of the entries will
         get evicted.
     -->
-    <eviction-percentage>25</eviction-percentage>
+<!--    <eviction-percentage>25</eviction-percentage>-->
     <!--
         While recovering from split-brain (network partitioning),
         map entries in the small cluster will merge into the bigger cluster
@@ -160,13 +162,24 @@
         com.hazelcast.map.merge.HigherHitsMapMergePolicy ; entry with the higher hits wins.
         com.hazelcast.map.merge.LatestUpdateMapMergePolicy ; entry with the latest update wins.
     -->
-    <merge-policy>com.hazelcast.map.merge.LatestUpdateMapMergePolicy</merge-policy>
+    <merge-policy>com.hazelcast.spi.merge.LatestAccessMergePolicy</merge-policy>
+
 
   </map>
 
   <!-- Used internally in Vert.x to implement async locks -->
-  <semaphore name="__vertx.*">
-    <initial-permits>1</initial-permits>
-  </semaphore>
+<!--  <semaphore name="__vertx.*">-->
+<!--    <initial-permits>1</initial-permits>-->
+<!--  </semaphore>-->
 
+  <cp-subsystem>
+    <cp-member-count>0</cp-member-count>
+    <semaphores>
+      <semaphore>
+        <name>__vertx.*"</name>
+        <jdk-compatible>false</jdk-compatible>
+        <initial-permits>1</initial-permits>
+      </semaphore>
+    </semaphores>
+  </cp-subsystem>
 </hazelcast>

@@ -16,7 +16,7 @@
 
 package io.vertx.spi.cluster.hazelcast.impl;
 
-import com.hazelcast.core.IMap;
+import com.hazelcast.map.IMap;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.shareddata.AsyncMap;

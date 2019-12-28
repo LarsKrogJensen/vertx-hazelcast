@@ -1,26 +1,26 @@
 package io.vertx.spi.cluster.hazelcast.impl;
 
-import com.hazelcast.core.ExecutionCallback;
 import io.vertx.core.Promise;
 
-import static io.vertx.core.Future.failedFuture;
-import static io.vertx.core.Future.succeededFuture;
+import java.util.function.BiConsumer;
 
-class HandlerCallBackAdapter<V> implements ExecutionCallback<V> {
+class HandlerCallBackAdapter<V> implements BiConsumer<V, Throwable> {
 
-    private final Promise<V> promise;
+  private final Promise<V> promise;
 
-    public HandlerCallBackAdapter(Promise<V> promise) {
-        this.promise = promise;
+  public HandlerCallBackAdapter(Promise<V> promise) {
+    this.promise = promise;
+  }
+
+
+  @Override
+  public void accept(V v, Throwable t) {
+    if (t != null) {
+      promise.fail(t);
+    } else {
+      promise.complete(v);
     }
 
-    @Override
-    public void onResponse(V v) {
-        promise.complete(v);
-    }
+  }
 
-    @Override
-    public void onFailure(Throwable throwable) {
-        promise.fail(throwable);
-    }
 }

@@ -16,9 +16,12 @@
 
 package io.vertx.core;
 
+import com.hazelcast.cluster.MemberAttributeEvent;
+import com.hazelcast.cluster.MembershipEvent;
+import com.hazelcast.cluster.MembershipListener;
 import com.hazelcast.config.Config;
-import com.hazelcast.config.GroupConfig;
-import com.hazelcast.core.*;
+import com.hazelcast.core.Hazelcast;
+import com.hazelcast.core.HazelcastInstance;
 import io.vertx.LoggingTestWatcher;
 import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
 import io.vertx.test.core.AsyncTestBase;
@@ -78,9 +81,7 @@ public class ProgrammaticHazelcastClusterManagerTest extends AsyncTestBase {
     return new Config()
       .setProperty("hazelcast.wait.seconds.before.join", "0")
       .setProperty("hazelcast.local.localAddress", "127.0.0.1")
-      .setGroupConfig(new GroupConfig()
-        .setName(System.getProperty("vertx.hazelcast.test.group.name"))
-        .setPassword(System.getProperty("vertx.hazelcast.test.group.password")));
+      .setClusterName(System.getProperty("vertx.hazelcast.test.group.name"));
   }
 
   private void testProgrammatic(HazelcastClusterManager mgr, Config config) throws Exception {
@@ -204,7 +205,7 @@ public class ProgrammaticHazelcastClusterManagerTest extends AsyncTestBase {
   public void testThatExternalHZInstanceCanBeShutdown() {
     // This instance won't be used by vert.x
     HazelcastInstance instance = Hazelcast.newHazelcastInstance(createConfig());
-    String nodeID = instance.getCluster().getLocalMember().getUuid();
+    String nodeID = instance.getCluster().getLocalMember().getUuid().toString();
     instance.getCluster().addMembershipListener(new MembershipListener() {
       @Override
       public void memberAdded(MembershipEvent membershipEvent) {

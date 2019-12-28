@@ -15,10 +15,8 @@
  */
 package io.vertx.spi.cluster.hazelcast.impl;
 
-import com.hazelcast.core.IAtomicLong;
-import com.hazelcast.core.ICompletableFuture;
+import com.hazelcast.cp.IAtomicLong;
 import io.vertx.core.AsyncResult;
-import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -26,6 +24,7 @@ import io.vertx.core.impl.ContextInternal;
 import io.vertx.core.shareddata.Counter;
 
 import java.util.Objects;
+import java.util.concurrent.CompletionStage;
 
 /**
  *
@@ -119,10 +118,10 @@ public class HazelcastInternalAsyncCounter
     compareAndSet(expected, value).setHandler(resultHandler);
   }
 
-  private <T> Future<T> executeAsync(ICompletableFuture<T> future) {
+  private <T> Future<T> executeAsync(CompletionStage<T> future) {
     ContextInternal ctx = (ContextInternal) vertx.getOrCreateContext();
     io.vertx.core.Promise<T> promise = ctx.promise();
-    future.andThen(new HandlerCallBackAdapter<>(promise));
+    future.whenComplete(new HandlerCallBackAdapter<>(promise));
     return promise.future();
   }
 }
